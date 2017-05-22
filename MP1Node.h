@@ -28,9 +28,10 @@
 /**
  * Message Types
  */
-enum MsgTypes{
+enum MsgTypes {
     JOINREQ,
     JOINREP,
+    HEARTBEAT,
     DUMMYLASTMSGTYPE
 };
 
@@ -41,7 +42,7 @@ enum MsgTypes{
  */
 typedef struct MessageHdr {
 	enum MsgTypes msgType;
-}MessageHdr;
+} MessageHdr;
 
 /**
  * CLASS NAME: MP1Node
@@ -55,6 +56,23 @@ private:
 	Params *par;
 	Member *memberNode;
 	char NULLADDR[6];
+
+  Address getNodeAddress(int id, short port);
+  bool isAddressLocale(Address *address);
+
+	void updateMember(int id, short port, long heartbeat, long timestamp);
+	void updateMember(MemberListEntry& member);
+
+  void sendGenericHearbeatRequest(enum MsgTypes msgType, Address *to);
+	void sendMemberList(enum MsgTypes msgType, Address *to);
+
+	bool addMemberList(void *env, char *data, int size);
+  void checkFailure();
+
+	bool onJoinReqMsg(void *env, char *data, int size);
+	bool onJoinRepMsg(void *env, char *data, int size);
+  bool onHearbeatMsg(void *env, char *data, int size);
+
 
 public:
 	MP1Node(Member *, Params *, EmulNet *, Log *, Address *);
@@ -75,6 +93,7 @@ public:
 	Address getJoinAddress();
 	void initMemberListTable(Member *memberNode);
 	void printAddress(Address *addr);
+
 	virtual ~MP1Node();
 };
 
